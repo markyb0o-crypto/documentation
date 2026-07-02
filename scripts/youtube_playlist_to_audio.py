@@ -1,24 +1,34 @@
 #!/usr/bin/env python3
 """
-YouTube-Playlist zu Audio-Dateien konvertieren.
+YouTube-Playlist zu Audio-Dateien konvertieren (Windows, macOS, Linux).
 
 Lädt jedes Video einer Playlist nacheinander herunter und speichert
 die extrahierte Audiodatei im Download-Ordner.
 
 Voraussetzungen:
     pip install yt-dlp
-    ffmpeg (System-Paket)
+    ffmpeg (muss im PATH liegen)
 
-Beispiel:
-    python3 scripts/youtube_playlist_to_audio.py "https://www.youtube.com/playlist?list=PLxxxx"
-    python3 scripts/youtube_playlist_to_audio.py --format m4a --output ~/Musik "PLAYLIST_URL"
+Windows-Beispiel:
+    python youtube_playlist_to_audio.py "https://www.youtube.com/playlist?list=PLxxxx"
+    youtube_playlist_to_audio.bat "https://www.youtube.com/playlist?list=PLxxxx"
+
+Linux/macOS-Beispiel:
+    python3 youtube_playlist_to_audio.py "https://www.youtube.com/playlist?list=PLxxxx"
 """
 
 from __future__ import annotations
 
 import argparse
+import platform
+import shutil
 import sys
 from pathlib import Path
+
+if sys.platform == "win32":
+    # Umlaute und Sonderzeichen in der Windows-Konsole korrekt anzeigen
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
 try:
     import yt_dlp
@@ -33,7 +43,39 @@ except ImportError:
 
 def default_download_dir() -> Path:
     """Gibt den Standard-Download-Ordner des Systems zurück."""
+    if sys.platform == "win32":
+        # Windows: C:\Users\<Name>\Downloads
+        downloads = Path.home() / "Downloads"
+        if downloads.exists():
+            return downloads
+        # Fallback über Umgebungsvariable
+        userprofile = Path.home()
+        return userprofile / "Downloads"
+
     return Path.home() / "Downloads"
+
+
+def check_ffmpeg() -> None:
+    """Prüft, ob ffmpeg verfügbar ist, und gibt plattformspezifische Hinweise."""
+    if shutil.which("ffmpeg"):
+        return
+
+    print("Fehler: ffmpeg wurde nicht gefunden (muss im PATH liegen).", file=sys.stderr)
+    if sys.platform == "win32":
+        print(
+            "\nWindows – ffmpeg installieren (eine Option wählen):\n"
+            "  winget install Gyan.FFmpeg\n"
+            "  choco install ffmpeg\n"
+            "  Oder von https://ffmpeg.org/download.html herunterladen\n"
+            "  und den bin-Ordner zum PATH hinzufügen.",
+            file=sys.stderr,
+        )
+    elif platform.system() == "Darwin":
+        print("\nmacOS: brew install ffmpeg", file=sys.stderr)
+    else:
+        print("\nLinux: sudo apt install ffmpeg  (Debian/Ubuntu)", file=sys.stderr)
+
+    sys.exit(1)
 
 
 def build_options(
@@ -164,6 +206,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    check_ffmpeg()
     args = parse_args()
     download_playlist(
         playlist_url=args.playlist_url,
