@@ -169,13 +169,59 @@ def download_playlist(
     print(f"Fertig. Audiodateien liegen in: {output_dir}")
 
 
+def script_dir() -> Path:
+    """Ordner, in dem dieses Script liegt."""
+    return Path(__file__).resolve().parent
+
+
+def resolve_playlist_url(url_arg: str | None) -> str:
+    """
+    Ermittelt die Playlist-URL aus (in dieser Reihenfolge):
+    1. Kommandozeilen-Argument
+    2. Datei playlist.txt neben dem Script
+    3. Interaktive Eingabe (z. B. bei Doppelklick)
+    """
+    if url_arg and url_arg.strip():
+        return url_arg.strip()
+
+    playlist_file = script_dir() / "playlist.txt"
+    if playlist_file.exists():
+        for line in playlist_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                print(f"Playlist aus {playlist_file.name} gelesen.")
+                return line
+
+    print()
+    print("=" * 60)
+    print("  YouTube-Playlist zu Audio")
+    print("=" * 60)
+    print()
+    print("Gib die Playlist-URL ein (Rechtsklick in Browser → Link kopieren):")
+    print("Beispiel: https://www.youtube.com/playlist?list=PLxxxx")
+    print()
+    url = input("Playlist-URL: ").strip()
+
+    if not url:
+        print("\nFehler: Keine URL angegeben.", file=sys.stderr)
+        print(
+            f"Tipp: URL in diese Datei speichern und erneut starten:\n  {playlist_file}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    return url
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Konvertiert eine YouTube-Playlist nacheinander in Audiodateien.",
     )
     parser.add_argument(
         "playlist_url",
-        help="URL der YouTube-Playlist (z. B. https://www.youtube.com/playlist?list=...)",
+        nargs="?",
+        default=None,
+        help="URL der YouTube-Playlist (optional – sonst playlist.txt oder Eingabeaufforderung)",
     )
     parser.add_argument(
         "-o",
@@ -208,8 +254,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     check_ffmpeg()
     args = parse_args()
+    playlist_url = resolve_playlist_url(args.playlist_url)
     download_playlist(
-        playlist_url=args.playlist_url,
+        playlist_url=playlist_url,
         output_dir=args.output.expanduser().resolve(),
         audio_format=args.format,
         quality=args.quality,
