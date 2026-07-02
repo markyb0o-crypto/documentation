@@ -272,6 +272,27 @@ html, body {
 }
 
 @media (max-width: 980px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.15rem;
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+
   .layout {
     grid-template-columns: 1fr;
   }
@@ -279,5 +300,42 @@ html, body {
   .panel.controls {
     border-right: none;
     border-bottom: 1px solid var(--border);
+    max-height: none;
+  }
+
+  .preview-area {
+    padding: 0.75rem;
+  }
+
+  .preview-stage {
+    min-height: 280px;
+  }
+
+  #previewCanvas {
+    max-height: 50vh;
+  }
+
+  .field input[type="range"] {
+    min-height: 28px;
+  }
+
+  .filmstrip-item {
+    width: 64px;
+    height: 64px;
+  }
+
+  .preview-meta {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .color-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
   }
 }
