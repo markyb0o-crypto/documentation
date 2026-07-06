@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import Canvas3D from './components/view/Canvas3D.jsx';
 import MappingMenu from './components/ui/MappingMenu.jsx';
-import { setMappingEntry } from './state/mappingStore.js';
+import { removeMappingEntry, setMappingEntry } from './state/mappingStore.js';
 import { MappingProvider, useMapping } from './state/MappingContext.jsx';
 
 function AppContent() {
@@ -14,13 +14,18 @@ function AppContent() {
     [setSelectedMeshId],
   );
 
-  const handleActionSelect = useCallback(
-    (action) => {
+  const handleParameterAssign = useCallback(
+    (parameter) => {
       if (!selectedMeshId) return;
-      setMappings((prev) => setMappingEntry(prev, selectedMeshId, action));
+      setMappings((prev) => setMappingEntry(prev, selectedMeshId, parameter));
     },
     [selectedMeshId, setMappings],
   );
+
+  const handleParameterClear = useCallback(() => {
+    if (!selectedMeshId) return;
+    setMappings((prev) => removeMappingEntry(prev, selectedMeshId));
+  }, [selectedMeshId, setMappings]);
 
   return (
     <div className="relative h-full w-full">
@@ -31,8 +36,9 @@ function AppContent() {
 
       <MappingMenu
         meshId={selectedMeshId}
-        currentAction={selectedMeshId ? mappings[selectedMeshId] : null}
-        onSelect={handleActionSelect}
+        currentParameter={selectedMeshId ? mappings[selectedMeshId] : null}
+        onAssign={handleParameterAssign}
+        onClear={handleParameterClear}
         onClose={() => setSelectedMeshId(null)}
       />
 
