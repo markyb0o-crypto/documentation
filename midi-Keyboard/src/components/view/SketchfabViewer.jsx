@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { applyCinematicScene, focusControlShot, startCameraSlides } from '../../controller/sketchfabCinematic.js';
 import { SKETCHFAB_MODEL } from '../../config/sketchfabModel.js';
+import ModelCredits from '../ui/ModelCredits.jsx';
 
 export default function SketchfabViewer({ onControlClick, pauseCamera = false }) {
   const iframeRef = useRef(null);
@@ -24,7 +25,7 @@ export default function SketchfabViewer({ onControlClick, pauseCamera = false })
       preload: 1,
       ui_controls: 1,
       ui_infos: 0,
-      ui_watermark: 0,
+      ui_watermark: 1,
       success(api) {
         if (cancelled) return;
         apiRef.current = api;
@@ -70,34 +71,7 @@ export default function SketchfabViewer({ onControlClick, pauseCamera = false })
         allow="autoplay; fullscreen; xr-spatial-tracking"
         allowFullScreen
       />
-      <p className="pointer-events-auto absolute bottom-2 left-2 z-20 m-0 text-[11px] text-slate-500">
-        <a
-          href={SKETCHFAB_MODEL.url}
-          target="_blank"
-          rel="noreferrer"
-          className="font-semibold text-sky-400 hover:text-sky-300"
-        >
-          {SKETCHFAB_MODEL.title}
-        </a>
-        {' by '}
-        <a
-          href={SKETCHFAB_MODEL.authorUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="font-semibold text-sky-400 hover:text-sky-300"
-        >
-          {SKETCHFAB_MODEL.author}
-        </a>
-        {' on '}
-        <a
-          href={SKETCHFAB_MODEL.sketchfabUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="font-semibold text-sky-400 hover:text-sky-300"
-        >
-          Sketchfab
-        </a>
-      </p>
+      <ModelCredits />
     </div>
   );
 }

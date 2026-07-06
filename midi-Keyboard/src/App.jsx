@@ -61,7 +61,7 @@ function Mapper() {
       <button
         type="button"
         onClick={() => setShowCatalog(true)}
-        className="pointer-events-auto absolute right-4 top-4 z-10 rounded-full border border-slate-600 bg-slate-900/90 px-4 py-2 text-sm text-slate-200 backdrop-blur hover:bg-slate-800"
+        className="pointer-events-auto absolute right-4 top-4 z-30 rounded-full border border-slate-600 bg-slate-900/90 px-4 py-2 text-sm text-slate-200 backdrop-blur hover:bg-slate-800"
       >
         Funktionen
       </button>
