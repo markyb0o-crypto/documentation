@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Canvas3D from './components/view/Canvas3D.jsx';
 import AssignPanel from './components/ui/AssignPanel.jsx';
+import FunctionCatalog from './components/ui/FunctionCatalog.jsx';
 import { applyLearnedMidi } from './controller/flPresetCatalog.js';
 import useWebMidi from './hooks/useWebMidi.js';
 import { setMappingEntry } from './state/mappingStore.js';
@@ -13,6 +14,7 @@ function Mapper() {
   const listenStop = useRef(null);
   const [listening, setListening] = useState(false);
   const [learnedMidi, setLearnedMidi] = useState(null);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   useEffect(() => {
     connect().catch(() => {});
@@ -55,6 +57,17 @@ function Mapper() {
   return (
     <div className="relative h-full w-full">
       <Canvas3D onControlClick={handleControlClick} highlightedMeshId={selectedMeshId} />
+
+      <button
+        type="button"
+        onClick={() => setShowCatalog(true)}
+        className="pointer-events-auto absolute right-4 top-4 z-10 rounded-full border border-slate-600 bg-slate-900/90 px-4 py-2 text-sm text-slate-200 backdrop-blur hover:bg-slate-800"
+      >
+        Funktionen
+      </button>
+
+      <FunctionCatalog open={showCatalog} onClose={() => setShowCatalog(false)} />
+
       <AssignPanel
         meshId={selectedMeshId}
         learnedMidi={learnedMidi}

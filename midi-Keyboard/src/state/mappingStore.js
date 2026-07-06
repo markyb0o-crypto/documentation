@@ -5,8 +5,10 @@
  *   presetId: string,
  *   label: string,
  *   category: string,
- *   midi: { type: 'cc' | 'note' | 'builtin', channel: number, number: number },
- *   flSteps: string[],
+ *   description: string,
+ *   flLocation: string,
+ *   midi: MidiBinding,
+ *   flSteps?: string[],
  *   isBuiltIn?: boolean,
  * }
  */

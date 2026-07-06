@@ -14,9 +14,10 @@ export function exportMappingToJson(mappings) {
       meshId,
       label: assignment.label,
       category: assignment.category,
+      description: assignment.description,
+      flLocation: assignment.flLocation,
       midi: assignment.midi,
       midiLabel: formatMidiLabel(assignment.midi),
-      flSteps: assignment.flSteps,
     })),
   };
 
