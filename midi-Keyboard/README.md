@@ -1,36 +1,25 @@
-# MIDI Keyboard Mapper
+# Axiom → FL Studio
 
-Einfaches 3D-Tool zum Zuweisen von Axiom-Bedienelementen an FL Studio – **ohne technische Vorkenntnisse**.
+**Ein Bildschirm. Zwei Klicks. Kein Terminal.**
 
-## Warum dieser Ansatz?
+## Was anders ist
 
-FL Studio hat keine einfache Schnittstelle für Web-Apps. Der bewährte Weg (auch für Profis) heißt **„Link to controller"**:
+Statt 3D-Modell, Git, Codespace und vier schwebender Panels:
 
-1. Du sagst dem Tool, welches Bedienelement was steuern soll
-2. In FL verknüpfst du den Regler mit einem Rechtsklick – fertig
+1. **2D-Controller** – sieht aus wie dein Axiom, funktioniert auf dem Handy
+2. **FL-Ziele rechts** – große Buttons, kein Menü-Chaos
+3. **Auto-Scan** – ein Knopf, App sagt „Bewege Fader 1“, dann Fader 2, …
 
-Genau so funktionieren bei dir schon **Klavier** und **Oktave** im Generic-Modus.
+## Start
 
-## Schnellstart
+```bash
+cd midi-Keyboard && npm install && npm run dev
+```
 
-1. Axiom per USB anschließen
-2. GLB-Datei nach `public/models/m-audio_axiom_pro_25.glb` legen
-3. `npm install && npm run dev`
-4. In **Chrome oder Edge** öffnen (für Web MIDI)
-5. „Keyboard verbinden" klicken
-6. 3D-Bauteil anklicken → Ziel wählen oder „MIDI lernen"
-7. Anleitung unten links in FL Studio ausführen
+Chrome/Edge am PC für Keyboard-Verbindung und Auto-Scan.
 
-## Lernmodus
+## FL verknüpfen
 
-„MIDI lernen" → Regler am Axiom bewegen → Ziel wählen (z.B. Track 1 Lautstärke).
-So musst du keine CC-Nummern kennen.
+Rechtsklick in FL → Link to controller → Regler bewegen → Accept.
 
-## Architektur
-
-| Layer | Aufgabe |
-|-------|---------|
-| View | 3D-Modell, Klicks → `meshId` |
-| UI | Anleitung, Presets, Lernmodus |
-| State | `meshId` → MIDI + FL-Ziel |
-| Controller | Web MIDI, Export |
+Das bleibt FL-intern – aber die App sagt dir genau, welches Hardware-Teil zu welchem Ziel gehört.
