@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Canvas3D from './components/view/Canvas3D.jsx';
+import SketchfabViewer from './components/view/SketchfabViewer.jsx';
 import AssignPanel from './components/ui/AssignPanel.jsx';
 import FunctionCatalog from './components/ui/FunctionCatalog.jsx';
 import { applyLearnedMidi } from './controller/flPresetCatalog.js';
@@ -56,7 +56,7 @@ function Mapper() {
 
   return (
     <div className="relative h-full w-full">
-      <Canvas3D onControlClick={handleControlClick} highlightedMeshId={selectedMeshId} />
+      <SketchfabViewer onControlClick={handleControlClick} />
 
       <button
         type="button"
