@@ -1,33 +1,43 @@
 /**
- * Ziel-Schema für FL-Studio-Parameter-Zuweisungen.
+ * Zuweisung: 3D-Bauteil → MIDI-Signal → FL-Studio-Ziel (per Link to Controller).
  *
  * mappings[meshId] = {
- *   parameterId: string,   // stabile ID aus FL (z.B. "mixer.track.3.volume")
- *   label: string,         // Anzeigename in FL
- *   category: string,      // z.B. "Mixer", "Playlist", "Plugin"
- *   path: string[],        // hierarchischer Pfad für die UI-Suche
+ *   presetId: string,
+ *   label: string,
+ *   category: string,
+ *   midi: { type: 'cc' | 'note' | 'builtin', channel: number, number: number },
+ *   flSteps: string[],
+ *   isBuiltIn?: boolean,
  * }
  */
 
-/** @typedef {{ parameterId: string, label: string, category: string, path: string[] }} FlParameter */
+/** @typedef {{ type: 'cc' | 'note' | 'builtin', channel: number, number: number }} MidiBinding */
 
-/** @type {Record<string, FlParameter>} */
+/**
+ * @typedef {{
+ *   presetId: string,
+ *   label: string,
+ *   category: string,
+ *   midi: MidiBinding,
+ *   flSteps: string[],
+ *   isBuiltIn?: boolean,
+ * }} ControlAssignment
+ */
+
+/** @type {Record<string, ControlAssignment>} */
 export const initialMappingState = {};
 
 /**
- * @param {Record<string, FlParameter>} mappings
+ * @param {Record<string, ControlAssignment>} mappings
  * @param {string} meshId
- * @param {FlParameter} flParameter
+ * @param {ControlAssignment} assignment
  */
-export function setMappingEntry(mappings, meshId, flParameter) {
-  return {
-    ...mappings,
-    [meshId]: flParameter,
-  };
+export function setMappingEntry(mappings, meshId, assignment) {
+  return { ...mappings, [meshId]: assignment };
 }
 
 /**
- * @param {Record<string, FlParameter>} mappings
+ * @param {Record<string, ControlAssignment>} mappings
  * @param {string} meshId
  */
 export function removeMappingEntry(mappings, meshId) {
@@ -37,10 +47,19 @@ export function removeMappingEntry(mappings, meshId) {
 }
 
 /**
- * @param {Record<string, FlParameter>} mappings
- * @param {string} meshId
- * @returns {FlParameter | null}
+ * @param {Record<string, ControlAssignment>} mappings
+ * @returns {number}
  */
-export function getMappingForMesh(mappings, meshId) {
-  return mappings[meshId] ?? null;
+export function countMappings(mappings) {
+  return Object.keys(mappings).length;
+}
+
+/**
+ * @param {MidiBinding} midi
+ */
+export function formatMidiLabel(midi) {
+  if (midi.type === 'builtin') return 'Bereits aktiv (Generic)';
+  if (midi.type === 'cc') return `MIDI CC ${midi.number} (Kanal ${midi.channel})`;
+  if (midi.type === 'note') return `MIDI Note ${midi.number} (Kanal ${midi.channel})`;
+  return 'Unbekannt';
 }
