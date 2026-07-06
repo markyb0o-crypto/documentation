@@ -3,19 +3,20 @@
   "productName": "Axiom FL Mapper",
   "private": true,
   "version": "1.0.0",
-  "description": "M-Audio Axiom Pro 25 → FL Studio Mapping",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
     "desktop": "npm run build && electron .",
     "desktop:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER=1 electron .\""
   },
   "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
