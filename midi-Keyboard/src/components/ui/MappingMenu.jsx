@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { PRESET_CATEGORIES, getPresetsByCategory } from '../../controller/flPresetCatalog.js';
 import { formatMidiLabel } from '../../state/mappingStore.js';
+import { formatMeshLabel } from '../../state/meshLabels.js';
 
 export default function MappingMenu({
   meshId,
@@ -44,7 +45,7 @@ export default function MappingMenu({
         </div>
 
         <p className="mb-2 break-all text-xs text-slate-400">
-          Bauteil: <span className="font-mono text-slate-300">{meshId}</span>
+          Bauteil: <span className="font-medium text-slate-200">{formatMeshLabel(meshId)}</span>
         </p>
 
         {currentAssignment ? (

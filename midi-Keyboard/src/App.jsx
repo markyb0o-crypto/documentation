@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import Canvas3D from './components/view/Canvas3D.jsx';
+import { useGlbAvailable } from './components/view/AxiomModel.jsx';
 import FlStepsPanel from './components/ui/FlStepsPanel.jsx';
 import MappingMenu from './components/ui/MappingMenu.jsx';
 import SetupGuide from './components/ui/SetupGuide.jsx';
@@ -14,6 +15,8 @@ function AppContent() {
   const { supported, connected, devices, error, isLearning, connect, startLearning } = useWebMidi();
   const [learnedMidi, setLearnedMidi] = useState(null);
   const learnCleanupRef = useRef(null);
+  const glbAvailable = useGlbAvailable();
+  const usingPlaceholder = glbAvailable !== true;
 
   const currentAssignment = selectedMeshId ? mappings[selectedMeshId] : null;
 
@@ -79,6 +82,7 @@ function AppContent() {
         deviceCount={devices.length}
         mappingCount={countMappings(mappings)}
         onConnect={connect}
+        usingPlaceholder={usingPlaceholder}
       />
 
       <MappingMenu

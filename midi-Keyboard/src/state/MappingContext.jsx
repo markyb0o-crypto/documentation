@@ -1,11 +1,26 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { initialMappingState } from './mappingStore.js';
+
+const STORAGE_KEY = 'midi-keyboard-mappings';
+
+function loadMappings() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : initialMappingState;
+  } catch {
+    return initialMappingState;
+  }
+}
 
 const MappingContext = createContext(null);
 
 export function MappingProvider({ children }) {
-  const [mappings, setMappings] = useState(initialMappingState);
+  const [mappings, setMappings] = useState(loadMappings);
   const [selectedMeshId, setSelectedMeshId] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mappings));
+  }, [mappings]);
 
   const value = useMemo(
     () => ({
