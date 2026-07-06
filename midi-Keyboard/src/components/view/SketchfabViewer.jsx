@@ -71,7 +71,7 @@ export default function SketchfabViewer({ onControlClick, pauseCamera = false })
         allow="autoplay; fullscreen; xr-spatial-tracking"
         allowFullScreen
       />
-      <ModelCredits />
+      <ModelCredits raised={pauseCamera} />
     </div>
   );
 }

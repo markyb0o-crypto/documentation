@@ -42,7 +42,13 @@ export default function AssignPanel({
         <div>
           <h2 className="text-base font-semibold text-white">{formatMeshLabel(meshId)}</h2>
           <p className="text-xs text-slate-400">
-            {isListening ? 'Regler einmal bewegen…' : learnedMidi ? '✓ MIDI erkannt' : 'Ziel wählen'}
+            {isListening
+              ? 'Regler einmal bewegen…'
+              : learnedMidi
+                ? `✓ ${learnedMidi.type === 'cc' ? `CC ${learnedMidi.number}` : `Note ${learnedMidi.number}`}`
+                : currentAssignment
+                  ? 'Bereits zugewiesen – neues Ziel wählen'
+                  : 'Ziel wählen'}
           </p>
         </div>
         <button type="button" onClick={onClose} className="rounded-lg px-3 py-1 text-slate-400 hover:bg-slate-800">
