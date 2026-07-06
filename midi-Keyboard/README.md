@@ -1,25 +1,33 @@
-# Axiom → FL Studio
+# Axiom FL Mapper
 
-**Ein Bildschirm. Zwei Klicks. Kein Terminal.**
+Desktop-App: M-Audio Axiom Pro 25 mit FL Studio verbinden.
 
-## Was anders ist
-
-Statt 3D-Modell, Git, Codespace und vier schwebender Panels:
-
-1. **2D-Controller** – sieht aus wie dein Axiom, funktioniert auf dem Handy
-2. **FL-Ziele rechts** – große Buttons, kein Menü-Chaos
-3. **Auto-Scan** – ein Knopf, App sagt „Bewege Fader 1“, dann Fader 2, …
-
-## Start
+## Start (einmalig am PC)
 
 ```bash
-cd midi-Keyboard && npm install && npm run dev
+cd midi-Keyboard
+npm install
+npm run desktop
 ```
 
-Chrome/Edge am PC für Keyboard-Verbindung und Auto-Scan.
+Fertig. Kein Git, kein Terminal danach nötig – Doppelklick reicht, wenn du die App einmal gebaut hast.
 
-## FL verknüpfen
+## Was die App macht
 
-Rechtsklick in FL → Link to controller → Regler bewegen → Accept.
+1. **Keyboard verbindet sich automatisch** (Desktop)
+2. **Auto-Scan** – du bewegst Fader/Knöpfe der Reihe nach
+3. **Antippen + FL-Ziel wählen** – zwei Klicks
+4. **Speichert alles** in `Dokumente/AxiomFL/` (Windows) bzw. `~/Documents/AxiomFL/` (Mac)
+5. **FL-Anleitung** – ein Knopf, kopiert die Schritte
 
-Das bleibt FL-intern – aber die App sagt dir genau, welches Hardware-Teil zu welchem Ziel gehört.
+## FL Studio
+
+Rechtsklick auf Regler → Link to controller → Hardware bewegen → Accept.
+
+Die App sagt dir, welcher Regler zu welchem FL-Ziel gehört.
+
+## Entwicklung
+
+```bash
+npm run desktop:dev
+```
