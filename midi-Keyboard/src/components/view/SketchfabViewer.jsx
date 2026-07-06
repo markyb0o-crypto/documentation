@@ -1,11 +1,16 @@
 import { useEffect, useRef } from 'react';
+import { applyCinematicScene, focusControlShot, startCameraSlides } from '../../controller/sketchfabCinematic.js';
 import { SKETCHFAB_MODEL } from '../../config/sketchfabModel.js';
 
-export default function SketchfabViewer({ onControlClick }) {
+export default function SketchfabViewer({ onControlClick, pauseCamera = false }) {
   const iframeRef = useRef(null);
   const onClickRef = useRef(onControlClick);
+  const pauseRef = useRef(pauseCamera);
+  const apiRef = useRef(null);
+  const stopSlidesRef = useRef(null);
 
   onClickRef.current = onControlClick;
+  pauseRef.current = pauseCamera;
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -22,8 +27,13 @@ export default function SketchfabViewer({ onControlClick }) {
       ui_watermark: 0,
       success(api) {
         if (cancelled) return;
+        apiRef.current = api;
         api.start();
+
         api.addEventListener('viewerready', () => {
+          applyCinematicScene(api);
+          stopSlidesRef.current = startCameraSlides(api, pauseRef);
+
           api.addEventListener(
             'click',
             (info) => {
@@ -32,6 +42,7 @@ export default function SketchfabViewer({ onControlClick }) {
                 if (err) return;
                 const node = Object.values(nodes).find((n) => n.instanceID === info.instanceID);
                 const meshId = node?.name?.trim() || `teil_${info.instanceID}`;
+                focusControlShot(api);
                 onClickRef.current(meshId);
               });
             },
@@ -44,11 +55,14 @@ export default function SketchfabViewer({ onControlClick }) {
 
     return () => {
       cancelled = true;
+      stopSlidesRef.current?.();
+      apiRef.current = null;
     };
   }, []);
 
   return (
-    <div className="sketchfab-embed-wrapper relative h-full w-full bg-[#0a0c10]">
+    <div className="sketchfab-embed-wrapper relative h-full w-full overflow-hidden bg-[#0a0c10]">
+      <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.55)_100%)]" />
       <iframe
         ref={iframeRef}
         title={SKETCHFAB_MODEL.title}
@@ -56,7 +70,7 @@ export default function SketchfabViewer({ onControlClick }) {
         allow="autoplay; fullscreen; xr-spatial-tracking"
         allowFullScreen
       />
-      <p className="pointer-events-auto absolute bottom-2 left-2 m-0 text-[11px] text-slate-500">
+      <p className="pointer-events-auto absolute bottom-2 left-2 z-20 m-0 text-[11px] text-slate-500">
         <a
           href={SKETCHFAB_MODEL.url}
           target="_blank"

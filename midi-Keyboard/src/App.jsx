@@ -56,7 +56,7 @@ function Mapper() {
 
   return (
     <div className="relative h-full w-full">
-      <SketchfabViewer onControlClick={handleControlClick} />
+      <SketchfabViewer onControlClick={handleControlClick} pauseCamera={Boolean(selectedMeshId)} />
 
       <button
         type="button"
