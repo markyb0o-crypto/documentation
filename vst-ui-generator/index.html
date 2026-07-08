@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>VST UI Asset Generator</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div>
+        <h1>VST UI Asset Generator</h1>
+        <p class="subtitle">PNG / SVG Prototyp · Neumorphism · Glassmorphism · Materialien</p>
+      </div>
+      <div class="header-actions">
+        <button id="exportPngBtn" class="btn btn-primary">PNG Export (ZIP)</button>
+        <button id="exportSvgBtn" class="btn btn-secondary">SVG Export (ZIP)</button>
+        <button id="exportSingleBtn" class="btn btn-ghost">Aktuelle Ansicht</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel controls">
+        <section>
+          <h2>Asset</h2>
+          <label class="field">
+            <span>Typ</span>
+            <select id="assetType">
+              <option value="knob">Knob (Drehregler)</option>
+              <option value="button">Button</option>
+              <option value="slider">Slider</option>
+              <option value="fader">Fader</option>
+              <option value="panel">Panel / Hintergrund</option>
+              <option value="led">LED / Indikator</option>
+              <option value="vuMeter">VU Meter Segment</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Style</span>
+            <select id="stylePreset">
+              <option value="flat">Flat</option>
+              <option value="neumorphism">Neumorphism</option>
+              <option value="glassmorphism">Glassmorphism</option>
+              <option value="skeuomorphic">Skeuomorph</option>
+              <option value="minimal">Minimal Dark</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Material</span>
+            <select id="materialPreset">
+              <option value="plastic">Plastik</option>
+              <option value="rubber">Gummi / Rubber</option>
+              <option value="glass">Glas</option>
+              <option value="metal">Metall</option>
+              <option value="brushedMetal">Gebürstetes Metall</option>
+              <option value="wood">Holz</option>
+              <option value="carbon">Carbon</option>
+            </select>
+          </label>
+        </section>
+
+        <section>
+          <h2>Größe & Skalierung</h2>
+          <label class="field slider-field">
+            <span>Breite <strong id="widthVal">80</strong> px</span>
+            <input type="range" id="width" min="24" max="512" value="80" />
+          </label>
+          <label class="field slider-field">
+            <span>Höhe <strong id="heightVal">80</strong> px</span>
+            <input type="range" id="height" min="24" max="512" value="80" />
+          </label>
+          <label class="field slider-field">
+            <span>Eckenradius <strong id="radiusVal">12</strong> px</span>
+            <input type="range" id="radius" min="0" max="128" value="12" />
+          </label>
+          <label class="field slider-field">
+            <span>Gesamt-Skala <strong id="scaleVal">1.0</strong>x</span>
+            <input type="range" id="scale" min="0.25" max="3" step="0.05" value="1" />
+          </label>
+          <label class="field slider-field">
+            <span>Strichstärke <strong id="strokeVal">1</strong> px</span>
+            <input type="range" id="strokeWidth" min="0" max="8" step="0.5" value="1" />
+          </label>
+        </section>
+
+        <section>
+          <h2>Farben</h2>
+          <div class="color-grid">
+            <label class="color-field"><span>Primär</span><input type="color" id="colorPrimary" value="#3d7cff" /></label>
+            <label class="color-field"><span>Sekundär</span><input type="color" id="colorSecondary" value="#1a1f2e" /></label>
+            <label class="color-field"><span>Akzent</span><input type="color" id="colorAccent" value="#00e5a0" /></label>
+            <label class="color-field"><span>Hintergrund</span><input type="color" id="colorBackground" value="#12151c" /></label>
+            <label class="color-field"><span>Highlight</span><input type="color" id="colorHighlight" value="#ffffff" /></label>
+            <label class="color-field"><span>Schatten</span><input type="color" id="colorShadow" value="#000000" /></label>
+          </div>
+          <label class="field slider-field">
+            <span>Deckkraft <strong id="opacityVal">100</strong>%</span>
+            <input type="range" id="opacity" min="10" max="100" value="100" />
+          </label>
+        </section>
+
+        <section id="stateSection">
+          <h2>Position / Zustand</h2>
+          <label class="field slider-field">
+            <span>Aktuelle Position <strong id="stateVal">0</strong></span>
+            <input type="range" id="stateIndex" min="0" max="7" value="0" />
+          </label>
+          <label class="field slider-field">
+            <span>Anzahl Frames <strong id="frameCountVal">8</strong></span>
+            <input type="range" id="frameCount" min="2" max="128" value="8" />
+          </label>
+          <label class="field" id="angleField">
+            <span>Winkelbereich</span>
+            <div class="inline-range">
+              <input type="number" id="angleStart" value="-135" min="-360" max="360" />
+              <span>bis</span>
+              <input type="number" id="angleEnd" value="135" min="-360" max="360" />
+            </div>
+          </label>
+          <label class="field checkbox-field">
+            <input type="checkbox" id="includeTrack" checked />
+            <span>Slider/Fader: Track mit exportieren</span>
+          </label>
+        </section>
+
+        <section>
+          <h2>Effekte</h2>
+          <label class="field slider-field">
+            <span>Schatten <strong id="shadowVal">40</strong>%</span>
+            <input type="range" id="shadowIntensity" min="0" max="100" value="40" />
+          </label>
+          <label class="field slider-field">
+            <span>Blur / Glow <strong id="blurVal">12</strong> px</span>
+            <input type="range" id="blurAmount" min="0" max="48" value="12" />
+          </label>
+          <label class="field slider-field">
+            <span>Glanz <strong id="glossVal">55</strong>%</span>
+            <input type="range" id="glossAmount" min="0" max="100" value="55" />
+          </label>
+          <label class="field slider-field">
+            <span>Rauheit <strong id="roughnessVal">35</strong>%</span>
+            <input type="range" id="roughness" min="0" max="100" value="35" />
+          </label>
+        </section>
+
+        <section>
+          <h2>Export</h2>
+          <label class="field">
+            <span>Ordner-Präfix</span>
+            <input type="text" id="exportPrefix" value="Asset" />
+          </label>
+          <label class="field">
+            <span>Nummerierung ab</span>
+            <input type="number" id="exportStart" value="1" min="1" max="9999" />
+          </label>
+          <label class="field checkbox-field">
+            <input type="checkbox" id="transparentBg" checked />
+            <span>Transparenter Hintergrund (freigestellt)</span>
+          </label>
+          <label class="field checkbox-field">
+            <input type="checkbox" id="paddingExport" checked />
+            <span>Export-Padding (4 px)</span>
+          </label>
+        </section>
+      </aside>
+
+      <section class="preview-area">
+        <div class="preview-toolbar">
+          <span>Vorschau</span>
+          <label class="checkbox-field">
+            <input type="checkbox" id="showGrid" />
+            <span>Raster</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" id="showChecker" checked />
+            <span>Transparenz-Checker</span>
+          </label>
+        </div>
+        <div class="preview-stage" id="previewStage">
+          <canvas id="previewCanvas" width="640" height="480"></canvas>
+        </div>
+        <div class="preview-meta">
+          <span id="previewInfo">Asset 1 / 8 · Knob · Neumorphism · Plastik</span>
+          <span id="exportInfo">Export: Asset_001.png … Asset_008.png</span>
+        </div>
+        <div class="filmstrip" id="filmstrip"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
