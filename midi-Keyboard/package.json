@@ -9,6 +9,7 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
+    "build:pages": "VITE_BASE=/documentation/ vite build",
     "preview": "vite preview",
     "desktop": "npm run build && electron .",
     "desktop:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER=1 electron .\""
