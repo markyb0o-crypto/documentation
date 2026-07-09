@@ -4,9 +4,12 @@
 
 ## Online testen
 
-**https://markyb0o-crypto.github.io/documentation/**
+**https://cdn.statically.io/gh/markyb0o-crypto/documentation@gh-pages/index.html**
 
 (Axiom per USB, Chrome/Edge, MIDI-Zugriff erlauben, Internet für 3D-Modell)
+
+Alternativ (einmalig in GitHub aktivieren):  
+https://markyb0o-crypto.github.io/documentation/
 
 ## Lokal starten
 
