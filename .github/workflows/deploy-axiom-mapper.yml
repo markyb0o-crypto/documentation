@@ -38,9 +38,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
-        env:
-          VITE_BASE: ./
+        run: npm run build:online
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
@@ -48,3 +46,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: midi-Keyboard/dist
           commit_message: 'Deploy Axiom FL Mapper'
+          enable_jekyll: false

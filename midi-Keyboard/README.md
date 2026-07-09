@@ -4,12 +4,20 @@
 
 ## Online testen
 
-**https://cdn.statically.io/gh/markyb0o-crypto/documentation@gh-pages/index.html**
+### Option A – GitHub Pages (empfohlen, mit MIDI)
 
-(Axiom per USB, Chrome/Edge, MIDI-Zugriff erlauben, Internet für 3D-Modell)
+Die App liegt fertig auf dem `gh-pages`-Branch. **Einmalig** in GitHub aktivieren:
 
-Alternativ (einmalig in GitHub aktivieren):  
-https://markyb0o-crypto.github.io/documentation/
+1. https://github.com/markyb0o-crypto/documentation/settings/pages
+2. **Source:** Deploy from a branch
+3. **Branch:** `gh-pages` → `/ (root)` → **Save**
+4. Nach ~1 Minute öffnen: **https://markyb0o-crypto.github.io/documentation/**
+
+(Axiom per USB, Chrome/Edge, MIDI-Zugriff erlauben)
+
+### Option B – StackBlitz (UI testen, MIDI eingeschränkt)
+
+https://stackblitz.com/github/markyb0o-crypto/documentation/tree/cursor/midi-keyboard-34ed/midi-Keyboard?startScript=start
 
 ## Lokal starten
 
