@@ -14,12 +14,19 @@ Dann im Browser die angezeigte URL öffnen (Standard: `http://localhost:5174`).
 
 ## Was die App macht
 
-1. Video auswählen oder per Drag & Drop laden  
+1. Video auswählen, per Drag & Drop laden **oder direkte Video-URL** einfügen  
 2. Frames extrahieren  
 3. Sechs forensische Heuristiken auswerten (Zeit, Schärfe, Farbe, Frequenz, Kanten, Textur)  
 4. KI-Score + Konfidenz + Verdikt anzeigen  
 
-**Kein Upload:** Die Analyse läuft vollständig im Browser. Es werden keine Dateien an einen Server geschickt.
+### URL
+
+Nur **direkte Dateilinks** funktionieren, z. B. `https://example.com/clip.mp4`.
+
+- YouTube-, TikTok- oder Instagram-Seiten-URLs gehen **nicht**
+- Der Host muss **CORS** für Browser erlauben — sonst Datei lokal speichern und hochladen
+
+**Kein Server-Upload der Analyse:** Frames werden lokal im Browser ausgewertet. Beim URL-Laden holt der Browser die Datei direkt vom Host.
 
 ## Hinweis
 

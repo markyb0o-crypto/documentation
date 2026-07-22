@@ -186,6 +186,59 @@ body {
   color: rgba(159, 180, 196, 0.75);
 }
 
+.url-row {
+  display: grid;
+  gap: 0.45rem;
+  max-width: 40rem;
+  margin-top: 0.25rem;
+}
+
+.url-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.url-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+}
+
+.url-field input {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(6, 16, 24, 0.65);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.url-field input::placeholder {
+  color: rgba(159, 180, 196, 0.45);
+}
+
+.url-field input:focus {
+  border-color: rgba(110, 240, 194, 0.55);
+  box-shadow: 0 0 0 1px rgba(110, 240, 194, 0.2);
+}
+
+.url-field .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .url-field {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ——— Drop zone / workspace ——— */
 .workspace {
   margin-top: 1rem;

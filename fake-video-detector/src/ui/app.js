@@ -1,4 +1,5 @@
 import { analyzeVideo } from "../analyzer/index.js";
+import { fetchVideoFromUrl } from "../analyzer/fetchVideoFromUrl.js";
 
 const ACCEPT = "video/mp4,video/webm,video/quicktime,video/x-msvideo,.mp4,.webm,.mov,.avi";
 
@@ -9,22 +10,37 @@ export function mountApp(root) {
       <header class="hero">
         <h1 class="brand">Klarsicht<span>Fake-Video-Check</span></h1>
         <p class="lede">
-          Lade ein Video — die Analyse läuft lokal im Browser und sucht nach
-          forensischen Spuren von KI-Generierung oder Manipulation.
+          Lade ein Video per Datei oder direkter URL — die Analyse läuft lokal
+          und sucht nach Spuren von KI-Generierung oder Manipulation.
         </p>
         <div class="cta-row">
           <button type="button" class="btn btn-primary" id="pickBtn">Video wählen</button>
           <button type="button" class="btn btn-ghost" id="analyzeBtn" disabled>Analysieren</button>
           <input id="fileInput" class="file-input" type="file" accept="${ACCEPT}" />
-          <span class="hint">MP4, WebM, MOV · max. ca. 100&nbsp;MB empfohlen</span>
+          <span class="hint">MP4, WebM, MOV · Datei oder Direktlink · max. ~100&nbsp;MB</span>
         </div>
+        <form class="url-row" id="urlForm">
+          <label class="url-label" for="urlInput">Video-URL</label>
+          <div class="url-field">
+            <input
+              id="urlInput"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="https://…/video.mp4"
+            />
+            <button type="submit" class="btn btn-ghost" id="urlBtn">URL laden</button>
+          </div>
+          <p class="hint">Nur direkte Dateilinks (.mp4/.webm). YouTube-/TikTok-Seiten-URLs gehen nicht (CORS).</p>
+        </form>
       </header>
 
       <section class="workspace" aria-label="Analysebereich">
         <div class="dropzone" id="dropzone">
           <div class="dropzone-inner" id="dropInner">
             <h2>Video hierher ziehen</h2>
-            <p>oder über den Button auswählen. Nichts wird hochgeladen — alles bleibt auf deinem Gerät.</p>
+            <p>Datei wählen, ablegen oder direkten Videolink oben einfügen. Analyse bleibt lokal im Browser.</p>
           </div>
           <div class="preview" id="preview">
             <div>
@@ -60,6 +76,9 @@ export function mountApp(root) {
   const pickBtn = root.querySelector("#pickBtn");
   const analyzeBtn = root.querySelector("#analyzeBtn");
   const fileInput = root.querySelector("#fileInput");
+  const urlForm = root.querySelector("#urlForm");
+  const urlInput = root.querySelector("#urlInput");
+  const urlBtn = root.querySelector("#urlBtn");
   const dropzone = root.querySelector("#dropzone");
   const dropInner = root.querySelector("#dropInner");
   const preview = root.querySelector("#preview");
@@ -81,6 +100,11 @@ export function mountApp(root) {
   fileInput.addEventListener("change", () => {
     const file = fileInput.files?.[0];
     if (file) setFile(file);
+  });
+
+  urlForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!busy) loadUrl(urlInput.value);
   });
 
   analyzeBtn.addEventListener("click", () => {
@@ -105,8 +129,12 @@ export function mountApp(root) {
     else if (file) showError("Bitte eine Videodatei ablegen.");
   });
 
-  function setFile(file) {
-    if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|avi)$/i.test(file.name)) {
+  /**
+   * @param {File} file
+   * @param {{ sourceUrl?: string }} [opts]
+   */
+  function setFile(file, opts = {}) {
+    if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|avi|m4v|mkv)$/i.test(file.name)) {
       showError("Dieser Dateityp wird nicht unterstützt.");
       return;
     }
@@ -128,17 +156,43 @@ export function mountApp(root) {
 
     dropInner.style.display = "none";
     preview.classList.add("is-visible");
+    const source = opts.sourceUrl
+      ? `<span>URL</span><span title="${escapeHtml(opts.sourceUrl)}">${escapeHtml(shortUrl(opts.sourceUrl))}</span>`
+      : "";
     metaLine.innerHTML = `
       <span><strong>${escapeHtml(file.name)}</strong></span>
       <span>${formatBytes(file.size)}</span>
       <span>${file.type || "video"}</span>
+      ${source}
     `;
+  }
+
+  async function loadUrl(raw) {
+    busy = true;
+    setBusyUi(true);
+    clearError();
+    resultEl.classList.remove("is-visible");
+    resultEl.innerHTML = "";
+    progressBlock.classList.add("is-visible");
+    setProgress(0, "URL wird geladen…");
+
+    try {
+      const file = await fetchVideoFromUrl(raw, (p, label) => setProgress(p, label));
+      setFile(file, { sourceUrl: String(raw).trim() });
+      progressBlock.classList.remove("is-visible");
+    } catch (err) {
+      console.error(err);
+      showError(err?.message || "URL konnte nicht geladen werden.");
+      progressBlock.classList.remove("is-visible");
+    } finally {
+      busy = false;
+      setBusyUi(false);
+    }
   }
 
   async function runAnalysis(file) {
     busy = true;
-    analyzeBtn.disabled = true;
-    pickBtn.disabled = true;
+    setBusyUi(true);
     clearError();
     resultEl.classList.remove("is-visible");
     resultEl.innerHTML = "";
@@ -156,10 +210,16 @@ export function mountApp(root) {
       showError(err?.message || "Analyse fehlgeschlagen.");
     } finally {
       busy = false;
-      analyzeBtn.disabled = !currentFile;
-      pickBtn.disabled = false;
+      setBusyUi(false);
       scanOverlay.classList.remove("is-active");
     }
+  }
+
+  function setBusyUi(isBusy) {
+    analyzeBtn.disabled = isBusy || !currentFile;
+    pickBtn.disabled = isBusy;
+    urlBtn.disabled = isBusy;
+    urlInput.disabled = isBusy;
   }
 
   function setProgress(p, label) {
@@ -230,6 +290,16 @@ function formatBytes(n) {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function shortUrl(url) {
+  try {
+    const u = new URL(url);
+    const path = u.pathname.length > 28 ? `${u.pathname.slice(0, 24)}…` : u.pathname;
+    return `${u.host}${path}`;
+  } catch {
+    return url.slice(0, 48);
+  }
 }
 
 function escapeHtml(str) {
