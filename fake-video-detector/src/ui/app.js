@@ -1,0 +1,241 @@
+import { analyzeVideo } from "../analyzer/index.js";
+
+const ACCEPT = "video/mp4,video/webm,video/quicktime,video/x-msvideo,.mp4,.webm,.mov,.avi";
+
+export function mountApp(root) {
+  root.innerHTML = `
+    <div class="bg" aria-hidden="true"></div>
+    <div class="shell">
+      <header class="hero">
+        <h1 class="brand">Klarsicht<span>Fake-Video-Check</span></h1>
+        <p class="lede">
+          Lade ein Video — die Analyse läuft lokal im Browser und sucht nach
+          forensischen Spuren von KI-Generierung oder Manipulation.
+        </p>
+        <div class="cta-row">
+          <button type="button" class="btn btn-primary" id="pickBtn">Video wählen</button>
+          <button type="button" class="btn btn-ghost" id="analyzeBtn" disabled>Analysieren</button>
+          <input id="fileInput" class="file-input" type="file" accept="${ACCEPT}" />
+          <span class="hint">MP4, WebM, MOV · max. ca. 100&nbsp;MB empfohlen</span>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Analysebereich">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-inner" id="dropInner">
+            <h2>Video hierher ziehen</h2>
+            <p>oder über den Button auswählen. Nichts wird hochgeladen — alles bleibt auf deinem Gerät.</p>
+          </div>
+          <div class="preview" id="preview">
+            <div>
+              <div class="video-wrap">
+                <video id="player" controls playsinline></video>
+                <div class="scan-overlay" id="scanOverlay" aria-hidden="true"></div>
+              </div>
+              <div class="meta-line" id="metaLine"></div>
+            </div>
+            <div class="panel">
+              <div class="progress-block" id="progressBlock">
+                <div class="progress-label">
+                  <span id="progressText">Bereit</span>
+                  <span id="progressPct">0%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+              </div>
+              <div class="error" id="error" role="alert"></div>
+              <div class="result" id="result"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="disclaimer">
+          Klarsicht ist ein Heuristik-Scanner für den Schnellcheck — kein forensisches
+          Gutachten. Hochwertige Deepfakes und starke Kompression können das Ergebnis
+          verfälschen. Für kritische Fälle zusätzliche Quellen und Spezialtools nutzen.
+        </p>
+      </section>
+    </div>
+  `;
+
+  const pickBtn = root.querySelector("#pickBtn");
+  const analyzeBtn = root.querySelector("#analyzeBtn");
+  const fileInput = root.querySelector("#fileInput");
+  const dropzone = root.querySelector("#dropzone");
+  const dropInner = root.querySelector("#dropInner");
+  const preview = root.querySelector("#preview");
+  const player = root.querySelector("#player");
+  const metaLine = root.querySelector("#metaLine");
+  const progressBlock = root.querySelector("#progressBlock");
+  const progressText = root.querySelector("#progressText");
+  const progressPct = root.querySelector("#progressPct");
+  const progressFill = root.querySelector("#progressFill");
+  const scanOverlay = root.querySelector("#scanOverlay");
+  const resultEl = root.querySelector("#result");
+  const errorEl = root.querySelector("#error");
+
+  let currentFile = null;
+  let objectUrl = null;
+  let busy = false;
+
+  pickBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files?.[0];
+    if (file) setFile(file);
+  });
+
+  analyzeBtn.addEventListener("click", () => {
+    if (currentFile && !busy) runAnalysis(currentFile);
+  });
+
+  ;["dragenter", "dragover"].forEach((ev) => {
+    dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropzone.classList.add("is-hot");
+    });
+  });
+  ;["dragleave", "drop"].forEach((ev) => {
+    dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("is-hot");
+    });
+  });
+  dropzone.addEventListener("drop", (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith("video/")) setFile(file);
+    else if (file) showError("Bitte eine Videodatei ablegen.");
+  });
+
+  function setFile(file) {
+    if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|avi)$/i.test(file.name)) {
+      showError("Dieser Dateityp wird nicht unterstützt.");
+      return;
+    }
+    if (file.size > 120 * 1024 * 1024) {
+      showError("Datei ist sehr groß — bitte unter ~100 MB bleiben für den Browser-Check.");
+      return;
+    }
+
+    clearError();
+    currentFile = file;
+    analyzeBtn.disabled = false;
+    resultEl.classList.remove("is-visible");
+    resultEl.innerHTML = "";
+    progressBlock.classList.remove("is-visible");
+
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = URL.createObjectURL(file);
+    player.src = objectUrl;
+
+    dropInner.style.display = "none";
+    preview.classList.add("is-visible");
+    metaLine.innerHTML = `
+      <span><strong>${escapeHtml(file.name)}</strong></span>
+      <span>${formatBytes(file.size)}</span>
+      <span>${file.type || "video"}</span>
+    `;
+  }
+
+  async function runAnalysis(file) {
+    busy = true;
+    analyzeBtn.disabled = true;
+    pickBtn.disabled = true;
+    clearError();
+    resultEl.classList.remove("is-visible");
+    resultEl.innerHTML = "";
+    progressBlock.classList.add("is-visible");
+    scanOverlay.classList.add("is-active");
+    setProgress(0, "Starte Analyse…");
+
+    try {
+      const result = await analyzeVideo(file, (p, label) => {
+        setProgress(p, label);
+      });
+      renderResult(result);
+    } catch (err) {
+      console.error(err);
+      showError(err?.message || "Analyse fehlgeschlagen.");
+    } finally {
+      busy = false;
+      analyzeBtn.disabled = !currentFile;
+      pickBtn.disabled = false;
+      scanOverlay.classList.remove("is-active");
+    }
+  }
+
+  function setProgress(p, label) {
+    const pct = Math.round(Math.min(1, Math.max(0, p)) * 100);
+    progressFill.style.width = `${pct}%`;
+    progressPct.textContent = `${pct}%`;
+    progressText.textContent = label;
+  }
+
+  function renderResult(result) {
+    progressBlock.classList.remove("is-visible");
+    resultEl.classList.add("is-visible");
+    resultEl.innerHTML = `
+      <div class="verdict">
+        <div class="verdict-kicker">Ergebnis</div>
+        <h2 class="verdict-title" data-v="${result.verdict}">${escapeHtml(result.label)}</h2>
+        <p class="verdict-summary">${escapeHtml(result.summary)}</p>
+        <div class="meters">
+          <div class="meter">
+            <div class="meter-label">KI-Score</div>
+            <div class="meter-value">${result.aiScore}%</div>
+          </div>
+          <div class="meter">
+            <div class="meter-label">Konfidenz</div>
+            <div class="meter-value">${result.confidence}%</div>
+          </div>
+        </div>
+      </div>
+      <ul class="signals">
+        ${result.signals
+          .map(
+            (s) => `
+          <li class="signal">
+            <span class="signal-name">${escapeHtml(s.label)}</span>
+            <span class="signal-score">${s.score}%</span>
+            <span class="signal-detail">${escapeHtml(s.detail)}</span>
+            <div class="signal-bar"><span style="width:${s.score}%"></span></div>
+          </li>`
+          )
+          .join("")}
+      </ul>
+    `;
+
+    // Trigger bar animation
+    requestAnimationFrame(() => {
+      resultEl.querySelectorAll(".signal-bar > span").forEach((el) => {
+        const w = el.style.width;
+        el.style.width = "0";
+        requestAnimationFrame(() => {
+          el.style.width = w;
+        });
+      });
+    });
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add("is-visible");
+  }
+
+  function clearError() {
+    errorEl.textContent = "";
+    errorEl.classList.remove("is-visible");
+  }
+}
+
+function formatBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
