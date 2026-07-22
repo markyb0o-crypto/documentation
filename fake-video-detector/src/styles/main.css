@@ -80,17 +80,34 @@ body {
   z-index: 1;
   width: min(1080px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 1.25rem 0 4rem;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 0
+    calc(4rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* ——— Hero ——— */
 .hero {
-  min-height: min(92vh, 820px);
+  min-height: min(88svh, 820px);
   display: grid;
   align-content: end;
   gap: 1.5rem;
   padding: 2rem 0 3rem;
   animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 0.95rem 1.4rem;
+  min-height: 48px;
+  border-radius: var(--radius);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .brand {
@@ -135,19 +152,6 @@ body {
   margin-top: 0.5rem;
 }
 
-.btn {
-  appearance: none;
-  border: 0;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  padding: 0.95rem 1.4rem;
-  border-radius: var(--radius);
-  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
-}
-
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -184,6 +188,59 @@ body {
 .hint {
   font-size: 0.82rem;
   color: rgba(159, 180, 196, 0.75);
+}
+
+.install-tip {
+  max-width: 36rem;
+  margin: 0.35rem 0 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--mint);
+  background: rgba(110, 240, 194, 0.08);
+  color: var(--fog);
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.45;
+}
+
+.install-tip strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.install-tip em {
+  font-style: normal;
+  color: var(--mint);
+  font-weight: 500;
+}
+
+.url-details {
+  max-width: 40rem;
+  margin-top: 0.35rem;
+  color: var(--fog);
+}
+
+.url-details summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--paper);
+  list-style: none;
+}
+
+.url-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.url-details summary::before {
+  content: "+ ";
+  color: var(--mint);
+}
+
+.url-details[open] summary::before {
+  content: "− ";
+}
+
+.url-details .url-row {
+  margin-top: 0.75rem;
 }
 
 .url-row {

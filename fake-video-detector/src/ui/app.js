@@ -10,37 +10,45 @@ export function mountApp(root) {
       <header class="hero">
         <h1 class="brand">Klarsicht<span>Fake-Video-Check</span></h1>
         <p class="lede">
-          Lade ein Video per Datei oder direkter URL — die Analyse läuft lokal
-          und sucht nach Spuren von KI-Generierung oder Manipulation.
+          Videos vom iPhone prüfen — lokal auf dem Gerät, ohne Cloud und ohne Upload.
+          Einmal auf den Home-Bildschirm legen, danach offline starten.
         </p>
         <div class="cta-row">
-          <button type="button" class="btn btn-primary" id="pickBtn">Video wählen</button>
+          <button type="button" class="btn btn-primary" id="pickBtn">Video aus Mediathek</button>
           <button type="button" class="btn btn-ghost" id="analyzeBtn" disabled>Analysieren</button>
           <input id="fileInput" class="file-input" type="file" accept="${ACCEPT}" />
-          <span class="hint">MP4, WebM, MOV · Datei oder Direktlink · max. ~100&nbsp;MB</span>
+          <span class="hint">Fotos/Dateien · MP4, MOV, WebM · bleibt auf dem Handy</span>
         </div>
-        <form class="url-row" id="urlForm">
-          <label class="url-label" for="urlInput">Video-URL</label>
-          <div class="url-field">
-            <input
-              id="urlInput"
-              type="url"
-              inputmode="url"
-              autocomplete="off"
-              spellcheck="false"
-              placeholder="https://…/video.mp4"
-            />
-            <button type="submit" class="btn btn-ghost" id="urlBtn">URL laden</button>
-          </div>
-          <p class="hint">Nur direkte Dateilinks (.mp4/.webm). YouTube-/TikTok-Seiten-URLs gehen nicht (CORS).</p>
-        </form>
+        <aside class="install-tip" id="installTip">
+          <strong>Offline auf dem iPhone:</strong>
+          In Safari unten auf Teilen tippen →
+          <em>Zum Home-Bildschirm</em> → danach Klarsicht wie eine App ohne Internet öffnen.
+        </aside>
+        <details class="url-details">
+          <summary>Optional: Video per URL laden</summary>
+          <form class="url-row" id="urlForm">
+            <label class="url-label" for="urlInput">Direkter Dateilink</label>
+            <div class="url-field">
+              <input
+                id="urlInput"
+                type="url"
+                inputmode="url"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="https://…/video.mp4"
+              />
+              <button type="submit" class="btn btn-ghost" id="urlBtn">URL laden</button>
+            </div>
+            <p class="hint">Nur direkte .mp4/.webm-Links. Braucht Netz; YouTube-Seiten gehen nicht.</p>
+          </form>
+        </details>
       </header>
 
       <section class="workspace" aria-label="Analysebereich">
         <div class="dropzone" id="dropzone">
           <div class="dropzone-inner" id="dropInner">
-            <h2>Video hierher ziehen</h2>
-            <p>Datei wählen, ablegen oder direkten Videolink oben einfügen. Analyse bleibt lokal im Browser.</p>
+            <h2>Video hier ablegen</h2>
+            <p>Oder „Video aus Mediathek“ — Analyse und Dateien bleiben auf deinem Gerät.</p>
           </div>
           <div class="preview" id="preview">
             <div>
@@ -65,9 +73,8 @@ export function mountApp(root) {
         </div>
 
         <p class="disclaimer">
-          Klarsicht ist ein Heuristik-Scanner für den Schnellcheck — kein forensisches
-          Gutachten. Hochwertige Deepfakes und starke Kompression können das Ergebnis
-          verfälschen. Für kritische Fälle zusätzliche Quellen und Spezialtools nutzen.
+          Klarsicht läuft offline als lokale Mini-App (PWA). Heuristik-Schnellcheck —
+          kein forensisches Gutachten. Keine Cloud, keine Analyse-Uploads.
         </p>
       </section>
     </div>
@@ -79,6 +86,7 @@ export function mountApp(root) {
   const urlForm = root.querySelector("#urlForm");
   const urlInput = root.querySelector("#urlInput");
   const urlBtn = root.querySelector("#urlBtn");
+  const installTip = root.querySelector("#installTip");
   const dropzone = root.querySelector("#dropzone");
   const dropInner = root.querySelector("#dropInner");
   const preview = root.querySelector("#preview");
@@ -95,6 +103,12 @@ export function mountApp(root) {
   let currentFile = null;
   let objectUrl = null;
   let busy = false;
+
+  // Bereits als Home-Screen-App → Install-Hinweis ausblenden
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+  if (isStandalone && installTip) installTip.hidden = true;
 
   pickBtn.addEventListener("click", () => fileInput.click());
   fileInput.addEventListener("change", () => {
